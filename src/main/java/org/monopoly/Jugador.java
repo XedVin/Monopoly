@@ -8,39 +8,25 @@ public class Jugador{
     private float fortuna;
     private ArrayList<Casilla> propiedades;
     private ArrayList<Casilla> hipotecas;
-    /** 
-     *
-     *  @param nombre Nombre del nuevo jugador
-     *  @param avatar Avatar en texto que se le debe asignar al jugador
-     *  @param salida Casilla de Salida
-     * 
-     * */
+
     public Jugador(String nombre,String avatar,Casilla salida){
         this.nombre = nombre;
         //TODO
         this.fortuna = 0;
         this.propiedades = new ArrayList<>();
         this.hipotecas = new ArrayList<>();
-        this.avatar = new Avatar(this,avatar,salida);
+        this.avatar = new Avatar(avatar,this,salida);
 
     }
-
-    /** 
-     *
-     *  @return Devuelve el avatar
-     *
-     * */
     public Avatar getAvatar(){
         return this.avatar;
     }
-    /**
-     *  @return Devuleve el nombre del jugador 
-     * */
     public String getNombre(){
         return this.nombre;
     }
-
-
+    public ArrayList<Casilla> getPropiedades(){
+        return this.propiedades;
+    }
     @Override
     public String toString() {
         //TODO añadir edificios
@@ -48,10 +34,10 @@ public class Jugador{
         {
             nombre: %s,
             avatar: %c,
-            fortuna: %d,
+            fortuna: %f,
             propiedades: %s,
             hipotecas: %s,
             edificios: todo
-        }\n""".formatted(this.nombre,this.avatar,this.fortuna,this.propiedades,this.hipotecas);
+        }\n""".formatted(this.nombre,this.avatar.getId(),this.fortuna,this.propiedades,this.hipotecas);
     }
 }

@@ -1,132 +1,165 @@
 package org.monopoly;
 import org.monopoly.ColorString.Color;
 
+import java.util.ArrayList;
+import java.util.Objects;
+
 public class Casilla{
     public enum TipoCasilla{
-        SOLAR,
-        TRANSPORTE,
-        SERVICIOS,
-        SUERTE,
-        COMUNIDAD,
-        IMPUESTOS,
-        ESPECIAL
+        SOLAR("Solar"),
+        TRANSPORTE("Transporte"),
+        SERVICIOS("Servicios"),
+        SUERTE("Suerte"),
+        COMUNIDAD("Comunidad"),
+        IMPUESTOS("Impuestos"),
+        ESPECIAL("Especial");
+
+        private String value;
+
+        private TipoCasilla(String value){
+            this.value = value;
+        }
+        public String getValue(){
+            return value;
+        }
+
     }
     public enum TipoCasillaEspecial{
-        CARCEL,
-        PARKING,
-        SALIDA,
-        IRCARCEL
+        CARCEL("Carcel"),
+        PARKING("Parking"),
+        SALIDA("Salida"),
+        IRCARCEL("IrCarcel");
+
+        private String v;
+        private TipoCasillaEspecial(String v){
+            this.v = v;
+        }
+        public String getValue(){
+            return v;
+        }
     }
     //TipoCasillaEspecial devolvera NULL si no es una casilla especial
+    private int pos;
     private TipoCasillaEspecial tipoEspecial;
     private String nombre;
     private TipoCasilla tipo;
+    private Jugador propietario;
     private Color grupo;
     private float valor;
     private float alquiler;
+    private ArrayList<Avatar> avatares;
 
-    /** 
-     *  Genera una nueva casilla segun el siguiente formato: <NombreCasilla> <TipoCasilla> <GrupoCasilla> <Opcional:TipoCasillaEspecial>
-     *  @param line linea de texto en el formato correcto
-     *
-     * */
-    public Casilla(String line){
+    public Casilla(String line,int pos){
+        
+        //EX: Madrid Especial Rojo Carcel
         String[] props = line.split(" ");
-
+        
         this.nombre = props[0];
-        this.tipo = toTipoCasilla(props[1]);
-        this.grupo = toColor(props[2]);
+        this.tipo = aTipoCasilla(props[1]);
+        this.grupo = aColor(props[2]);
         this.valor = 1;
         this.alquiler = 1;       
         if(this.tipo == TipoCasilla.ESPECIAL){
-            this.tipoEspecial = toTipoCasillaEspecial(props[3]); 
+            this.tipoEspecial = aTipoCasillaEspecial(props[3]); 
         }
+        this.avatares = new ArrayList<>();
+        this.pos = pos;
     }
-    /** 
-     *  @return Devuelve el nombre de la casilla
-     * */
+
+    
     public String getNombre(){
         return this.nombre;
     }
-    /** 
-     *  @return Devuelve el grupo de la casilla
-     * */
     public Color getGrupo(){
         return this.grupo;
     }
-    /** 
-     *  @return Devuelve si es la salida o no
-     * */
+    public int getPos(){
+        return this.pos;
+    }
+    public ArrayList<Avatar> getAvatares(){
+        return this.avatares;
+    }
+
+
     public boolean esSalida(){
         return this.tipoEspecial != null && this.tipoEspecial == TipoCasillaEspecial.SALIDA;
     }
+    public void añadirAvatar(Avatar av){
+        this.avatares.add(av);
+    }
+    public void eliminarAvatar(Avatar av){
+        this.avatares.remove(av);
+    }
+
 
     @Override
     public String toString() {
-        return this.getNombre();
+
+        return """
+        {
+            tipo: %s,
+            grupo: %s,
+            propietario: %s,
+            valor: %f,
+            alquiler: %f
+        }""".formatted(this.tipo,this.grupo,this.propietario != null ? this.propietario.getNombre() : "Nadie",this.valor,this.alquiler);
     }
-    /** 
-     *  Devuelve el grupo de una casilla segun una cadena de texto
-     *  TODO errores
-     * */
-    private Color toColor(String s){
-        switch(s){
+
+    public String toString(int longitud,int numMaximoAvatares) {
+        String nameSpan = " ".repeat(longitud - this.nombre.length());
+        String avatarSpan = numMaximoAvatares == 0 ? "" : " ".repeat(numMaximoAvatares + 1);
+        if (this.avatares.size() != 0){
+            avatarSpan = "&";
+            for(Avatar av: this.avatares){
+                avatarSpan +=av.getId();
+            }
+        }
+        return new ColorString(this.nombre + nameSpan + " " + avatarSpan).setColor(this.grupo) + "|";
+    }
+
+    private Color aColor(String s){
+        switch (s) {
             case "Rojo":
                 return Color.Rojo;
             case "Verde":
                 return Color.Verde;
             case "Amarillo":
-                return Color.Amarillo; 
+                return Color.Amarillo;
             case "Azul":
-                return Color.Azul; 
-            case "Negro":
-                return Color.Negro; 
+                return Color.Azul;
+            case "Rosa":
+                return Color.Rosa;
+            case "Naranja":
+                return Color.Naranja;
+            case "Morado":
+                return Color.Morado;
+            case "Cyan":
+                return Color.Cyan;
             case "Blanco":
-                return Color.Blanco; 
-            case "Cian":
-                return Color.Cian; 
-            case "Magenta":
-                return Color.Magenta;
+                return Color.Blanco;
+            case "GrisClaro":
+                return Color.GrisClaro;
+            case "VerdeClaro":
+                return Color.VerdeClaro;
             default:
-                return null;
+                return Color.Blanco;
         }
-
     }
-    private TipoCasilla toTipoCasilla(String s){
-        switch(s){
-            case "Solar":
-                return TipoCasilla.SOLAR;
-            case "Transporte":
-                return TipoCasilla.TRANSPORTE;
-            case "Suerte":
-                return TipoCasilla.SUERTE; 
-            case "Especial":
-                return TipoCasilla.ESPECIAL; 
-            case "Comunidad":
-                return TipoCasilla.COMUNIDAD; 
-            case "Impuestos":
-                return TipoCasilla.IMPUESTOS; 
-            case "Servicios":
-                return TipoCasilla.SERVICIOS; 
-            default:
-                return TipoCasilla.SOLAR;
+    public TipoCasilla aTipoCasilla(String v){
+        for(TipoCasilla t: TipoCasilla.values()){
+            if(Objects.equals(v,t.getValue())){
+                return t;
+            }
         }
-
+        return TipoCasilla.SOLAR; // TODO Valor de facto
     }
-    private TipoCasillaEspecial toTipoCasillaEspecial(String s){
-        switch(s){
-            case "Carcel":
-                return TipoCasillaEspecial.CARCEL;
-            case "Parking":
-                return TipoCasillaEspecial.PARKING;
-            case "Salida":
-                return TipoCasillaEspecial.SALIDA;
-            case "IrCarcel":
-                return TipoCasillaEspecial.IRCARCEL;
-            default:
-                // TODO
-                return TipoCasillaEspecial.CARCEL;
+    private TipoCasillaEspecial aTipoCasillaEspecial(String s){
+        for(TipoCasillaEspecial t: TipoCasillaEspecial.values()){
+            if(Objects.equals(s,t.getValue())){
+                return t;
+            }
         }
+        return TipoCasillaEspecial.CARCEL; // TODO Valor de facto
 
     }
 }

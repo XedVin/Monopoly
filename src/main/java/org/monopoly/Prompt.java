@@ -17,71 +17,145 @@ public class Prompt{
         this.ultimoComando = new String();
         this.scanner = new Scanner(System.in);
     }
-
-    /**
-     *
-     *  Devuelve el ultimo comando escrito 
-     * 
-     * */
-    public String getUltimoComando(){
-        return this.ultimoComando;
-    }
-
-    /**
-     *
-     *  Empieza el bucle para recibir los comandos
-     *  @param m Un objeto de la clase Monopoly
-     *
-     * */
     public void run(Monopoly m){
         while(true){
+            System.out.print("$>");
             this.ultimoComando = this.scanner.nextLine();
 
             if(Objects.equals(this.ultimoComando,"exit")){
                 break;
             }
             
-            procesarComando(m);
+            System.out.println(procesarComando(m));
         }
         this.scanner.close();
     }
+    public void preguntarNuevoJugador(Monopoly m){
+        System.out.print("Creando jugador\nNombre: ");
+        String nombre = this.scanner.nextLine();
+        System.out.print("Avatar(coche | pelota | esfinge | sombrero): ");
+        String avatar = this.scanner.nextLine();
+        m.getJugadores().add(new Jugador(nombre,avatar,m.getSalida()));
+    }
 
-    /**
-     *
-     *  Elige que comando ejecutar segun el input, quizas se deberia crear una nueva clase Comando
-     * */
-    private void procesarComando(Monopoly m){
+    private String procesarComando(Monopoly m){
         String[] args = this.ultimoComando.split(" ");
         switch(args[0]){
             case "ver":
-                comandoVer(m,args[1]);
-                break;
+                return comandoVer(m,args);
             case "crear":
-                comandoCrear(m,args);
-                break;
+                return comandoCrear(m,args);
+            case "listar":
+                return comandoListar(m,args);
+            case "describir":
+                return comandoDescribir(m,args);
+            case "comandos":
+                return comandoComandos();
+            case "acabar":
+                return comandoAcabar(m,args);
+            case "mover":
+                debugMover(m,args);
+                return "";
             default:
-                return;
-
-
+                return "Ese comando no existe";
         }
     }
-
-    //TODO añadir errores
-    private void comandoVer(Monopoly m,String target){
-        if(Objects.equals("tablero",target)){
-            System.out.println(m.getTablero());
-        }
+    private String comandoVer(Monopoly m,String[] args){
+        return args.length > 1 &&  args[1].equals("tablero") ? m.getTablero().toString() : "ver: <tablero>";
     }
-    private void comandoCrear(Monopoly m,String[] args){
+
+    private String comandoCrear(Monopoly m,String[] args){
         if(args.length == 1){
-            return;
+            return """
+                crear:
+                        <jugador> <nombre> <avatar>
+                """;
         }
+
         switch(args[1]){
             case "jugador":
-                Jugador j = new Jugador(args[2],args[3],m.getSalida());
-                m.setJugador(j);
-                m.setAvatar(j.getAvatar());
-                System.out.println(j); //TODO
+                return comandoCrearJugador(args[2],args[3],m);
+            default:
+                return """
+                crear:
+                        <jugador> <nombre> <avatar>
+                """;
         }
+    }
+
+    private String comandoCrearJugador(String nombre,String avatar,Monopoly m){
+        Jugador j = new Jugador(nombre,avatar,m.getSalida());
+        m.setJugador(j);
+        m.setAvatar(j.getAvatar());
+        return """
+            {
+                nombre: %s,
+                avatar: %c
+            }""".formatted(nombre,j.getAvatar().getId());
+    }
+    
+    private String comandoListar(Monopoly m,String[] args){
+        if(args.length != 2){
+            return """
+                {
+                    listar:
+                            <jugadores>
+                            <avatares>
+                }""";
+        }
+        if(args[1].equals("jugadores")){
+            String result = "";
+            for(Jugador j: m.getJugadores()){
+                result += j.toString();
+            }
+            return result;
+        }else if(args[1].equals("avatares")){
+            String result = "";
+            for(Avatar a: m.getAvatares()) {
+                result += a.toString();
+            }
+            return result;
+        }
+        return """
+                {
+                    listar:
+                            <jugadores>
+                            <avatares>
+                }""";
+
+    }
+    private String comandoDescribir(Monopoly m, String[] args){
+        if(args.length != 2){
+            return """
+                describir:
+                            <casilla>
+                """;
+        }
+        Casilla c = m.getCasillaPorNombre(args[1]);
+        if(c != null){
+            return c.toString();
+        }
+        return "Esa casilla no existe";
+    }
+    private String comandoComandos(){
+        return """
+            - ver tablero
+            - crear <jugador> <nombre> <avatar>
+            - listar <jugadores | avatares>
+            - describir <casilla>
+            """;
+
+    }
+    private String comandoAcabar(Monopoly m,String[] args){
+       if(args.length != 2 && !Objects.equals(args[1],"turno")){
+        return """
+                acabar <turno>
+            """;
+       }
+       m.siguienteTurno();
+       return "El jugador actual es %s".formatted(m.getJugadorActual().getNombre());
+    }
+    private void debugMover(Monopoly m, String[] args){
+        m.mover(Integer.parseInt(args[1]));
     }
 }

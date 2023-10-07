@@ -13,15 +13,8 @@ public class Avatar{
     private TipoAvatar tipo;
     private Casilla casilla;
     private Jugador jugador;
-    /** 
-     *
-     * Constructor para un nuevo avatar
-     *  @param jugador Jugador asignado al avatar
-     *  @param avatar Nombre del avatar en String
-     *  @param salida Casilla de salida
-     *
-     * */
-    public Avatar(Jugador jugador,String avatar,Casilla salida){
+
+    public Avatar(String avatar,Jugador jugador,Casilla salida){
         Random r = new Random();
         switch(avatar){
             case "coche":
@@ -42,9 +35,32 @@ public class Avatar{
         int randomInt = (r.nextInt(90-65)+65);
         this.id = (char)randomInt;
         this.casilla = salida;
+        salida.añadirAvatar(this);
         this.jugador = jugador;
     }
+
     public char getId(){
         return this.id;
+    }
+    public TipoAvatar getTipoAvatar(){
+        return this.tipo;
+    }
+    public Casilla getCasilla(){
+        return this.casilla;
+    }
+    public void setCasilla(Casilla c){
+        this.casilla.eliminarAvatar(this);
+        this.casilla = c;
+        this.casilla.añadirAvatar(this);
+    }
+    @Override
+    public String toString() {
+        return """
+               {
+                id: %c,
+                tipo: %s,
+                casilla: %s,
+                jugador: %s
+               }""".formatted(this.getId(),this.tipo,this.casilla.getNombre(),this.jugador.getNombre());
     }
 }
