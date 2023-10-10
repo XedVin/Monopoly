@@ -24,7 +24,7 @@ public class Casilla{
         }
 
     }
-    public enum TipoCasillaEspecial{
+    public static enum TipoCasillaEspecial{
         CARCEL("Carcel"),
         PARKING("Parking"),
         SALIDA("Salida"),
@@ -38,40 +38,64 @@ public class Casilla{
             return v;
         }
     }
-    //TipoCasillaEspecial devolvera NULL si no es una casilla especial
     private int pos;
-    private TipoCasillaEspecial tipoEspecial;
     private String nombre;
+    
     private TipoCasilla tipo;
+    private TipoCasillaEspecial tipoEspecial;
+    
     private Jugador propietario;
+    
     private Color grupo;
     private float valor;
+    
     private float alquiler;
+    
     private ArrayList<Avatar> avatares;
+
+    private float valorCasa;
+    private float valorHotel;
+    private float valorPiscina;
+    private float valorPistaDeporte;
 
     public Casilla(String line,int pos){
         
-        //EX: Madrid Especial Rojo Carcel
         String[] props = line.split(" ");
-        
         this.nombre = props[0];
-        this.tipo = aTipoCasilla(props[1]);
-        this.grupo = aColor(props[2]);
-        this.valor = 1;
-        this.alquiler = 1;       
-        if(this.tipo == TipoCasilla.ESPECIAL){
-            this.tipoEspecial = aTipoCasillaEspecial(props[3]); 
-        }
         this.avatares = new ArrayList<>();
+        this.tipo = aTipoCasilla(props[1]);
         this.pos = pos;
-    }
 
-    
+        switch(this.tipo){
+            case SOLAR:
+                this.grupo = aColor(props[2]);
+                this.valor = Float.parseFloat(props[3]);
+                this.alquiler = 0.1f*this.valor;
+                this.valorCasa = 0.6f*this.valor;
+                this.valorHotel = 0.6f*this.valor;
+                this.valorPiscina = 0.4f*this.valor;
+                this.valorPistaDeporte = 1.25f*this.valor;
+                break;
+            case TRANSPORTE:
+            case SERVICIOS:
+            case COMUNIDAD:
+            case SUERTE:
+            case IMPUESTOS:
+                this.grupo = Color.Blanco;
+                break;
+            case ESPECIAL:
+                this.tipoEspecial = aTipoCasillaEspecial(props[2]);
+                this.grupo = Color.Blanco;
+        }
+    }
     public String getNombre(){
         return this.nombre;
     }
     public Color getGrupo(){
         return this.grupo;
+    }
+    public TipoCasilla getTipo(){
+        return this.tipo;
     }
     public int getPos(){
         return this.pos;
@@ -79,7 +103,9 @@ public class Casilla{
     public ArrayList<Avatar> getAvatares(){
         return this.avatares;
     }
-
+    public float getValor(){
+        return this.valor;
+    }
 
     public boolean esSalida(){
         return this.tipoEspecial != null && this.tipoEspecial == TipoCasillaEspecial.SALIDA;
@@ -90,6 +116,10 @@ public class Casilla{
     public void eliminarAvatar(Avatar av){
         this.avatares.remove(av);
     }
+    public void setPropietario(Jugador j){
+        this.propietario = j;
+    }
+
 
 
     @Override
@@ -129,16 +159,16 @@ public class Casilla{
                 return Color.Azul;
             case "Rosa":
                 return Color.Rosa;
-            case "Naranja":
-                return Color.Naranja;
+            /*case "Naranja":
+                return Color.Naranja;*/
             case "Morado":
                 return Color.Morado;
             case "Cyan":
                 return Color.Cyan;
             case "Blanco":
                 return Color.Blanco;
-            case "GrisClaro":
-                return Color.GrisClaro;
+            /*case "GrisClaro":
+                return Color.GrisClaro;*/
             case "VerdeClaro":
                 return Color.VerdeClaro;
             default:

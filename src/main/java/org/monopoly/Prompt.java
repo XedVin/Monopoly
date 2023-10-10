@@ -30,6 +30,7 @@ public class Prompt{
         }
         this.scanner.close();
     }
+
     public void preguntarNuevoJugador(Monopoly m){
         System.out.print("Creando jugador\nNombre: ");
         String nombre = this.scanner.nextLine();
@@ -40,11 +41,21 @@ public class Prompt{
 
     private String procesarComando(Monopoly m){
         String[] args = this.ultimoComando.split(" ");
+        if (!m.esPartidaEmpezada()){
+            if(args[0].equals("empezar")){
+                if(m.getJugadores().size() >= 2){
+                    m.empezarPartida();
+                    return "La partida ha empezado";
+                }
+                return "Dos o mas jugadores son necesarios para empezar el juego";
+            }else if(args[0].equals("crear")){
+                return comandoCrear(m,args);
+            }
+            return "Ese comando no existe o no está disponible en esta etapa del juego";
+        }
         switch(args[0]){
             case "ver":
                 return comandoVer(m,args);
-            case "crear":
-                return comandoCrear(m,args);
             case "listar":
                 return comandoListar(m,args);
             case "describir":
@@ -53,17 +64,28 @@ public class Prompt{
                 return comandoComandos();
             case "acabar":
                 return comandoAcabar(m,args);
+            case "jugador":
+                return comandoJugador(m);
+            case "comprar":
+                return comandoComprar(m,args);
             case "mover":
-                debugMover(m,args);
-                return "";
+                return debugMover(m,args);
+            case "dados":
+                return debugDados(m,args);
+            case "lanzar":
+                return comandoLanzarDados(m,args);
             default:
                 return "Ese comando no existe";
         }
+
     }
     private String comandoVer(Monopoly m,String[] args){
         return args.length > 1 &&  args[1].equals("tablero") ? m.getTablero().toString() : "ver: <tablero>";
     }
 
+    private String comandoComprar(Monopoly m,String[] args){
+        return m.comprar(m.getJugadorActual(),args[1]);
+    }
     private String comandoCrear(Monopoly m,String[] args){
         if(args.length == 1){
             return """
@@ -155,7 +177,36 @@ public class Prompt{
        m.siguienteTurno();
        return "El jugador actual es %s".formatted(m.getJugadorActual().getNombre());
     }
-    private void debugMover(Monopoly m, String[] args){
-        m.mover(Integer.parseInt(args[1]));
+    private String comandoJugador(Monopoly m){
+        return String.format("""
+                {
+                    nombre: %s,
+                    avatar: %s
+                }
+                """, m.getJugadorActual().getNombre(),m.getJugadorActual().getAvatar().getId());
+
+    }
+    private String comandoLanzarDados(Monopoly m,String[] args){
+        if(args.length != 2 || !args[1].equals("dados")){
+            return "- lanzar <dados>";
+        }
+        if(!m.getJugadorActual().getAccion()){
+            return "El jugador ya ha lanzado los dados";
+        }
+
+        int resultado = (new Dado()).resultado();
+        if(resultado == -1){
+            //TODO
+            return "A la carcel";
+        }
+        return m.mover(resultado);
+    }
+    private String debugMover(Monopoly m, String[] args){
+        return m.mover(Integer.parseInt(args[1]));
+        
+    }
+    private String debugDados(Monopoly m, String[] args){
+        return String.format("-> %d",(new Dado()).resultado());
+        
     }
 }

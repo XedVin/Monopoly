@@ -8,11 +8,11 @@ public class ColorString {
         Amarillo("\u001B[38;5;3m"),
         Azul("\u001B[38;5;4m"),
         Rosa("\u001B[38;5;5m"),
-        Naranja("\u001B[38;5;202m"),
+        //Naranja("\u001B[38;5;202m"),
         Morado("\u001B[38;5;93m"),
         Cyan("\u001B[38;5;123m"),
         Blanco("\u001B[38;5;15m"),
-        GrisClaro("\u001B[38;5;250m"),
+        //GrisClaro("\u001B[38;5;250m"),
         VerdeClaro("\u001B[38;5;118m");
         private String value;
         private Color(String value){
