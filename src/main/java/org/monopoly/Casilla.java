@@ -2,7 +2,6 @@ package org.monopoly;
 import org.monopoly.ColorString.Color;
 
 import java.util.ArrayList;
-import java.util.Objects;
 
 public class Casilla{
     public enum TipoCasilla{
@@ -22,9 +21,17 @@ public class Casilla{
         public String getValue(){
             return value;
         }
+        public static TipoCasilla aTipoCasilla(String s){
+            for(TipoCasilla tipo : TipoCasilla.values()){
+                if(tipo.getValue().equals(s)){
+                    return tipo;
+                }
+            }
+            return null;
+        }
 
     }
-    public static enum TipoCasillaEspecial{
+    public enum TipoCasillaEspecial{
         CARCEL("Carcel"),
         PARKING("Parking"),
         SALIDA("Salida"),
@@ -36,6 +43,14 @@ public class Casilla{
         }
         public String getValue(){
             return v;
+        }
+        public static TipoCasillaEspecial aTipoCasillaEspecial(String s){
+            for(TipoCasillaEspecial tipo: TipoCasillaEspecial.values()){
+                if(tipo.getValue().equals(s)){
+                    return tipo;
+                }
+            }
+            return null;
         }
     }
     private int pos;
@@ -57,13 +72,16 @@ public class Casilla{
     private float valorHotel;
     private float valorPiscina;
     private float valorPistaDeporte;
+    
+
+    private float impuesto;
 
     public Casilla(String line,int pos){
         
         String[] props = line.split(" ");
         this.nombre = props[0];
         this.avatares = new ArrayList<>();
-        this.tipo = aTipoCasilla(props[1]);
+        this.tipo = TipoCasilla.aTipoCasilla(props[1]);
         this.pos = pos;
 
         switch(this.tipo){
@@ -84,7 +102,7 @@ public class Casilla{
                 this.grupo = Color.Blanco;
                 break;
             case ESPECIAL:
-                this.tipoEspecial = aTipoCasillaEspecial(props[2]);
+                this.tipoEspecial = TipoCasillaEspecial.aTipoCasillaEspecial(props[2]);
                 this.grupo = Color.Blanco;
         }
     }
@@ -97,6 +115,9 @@ public class Casilla{
     public TipoCasilla getTipo(){
         return this.tipo;
     }
+    public TipoCasillaEspecial getTipoEspecial(){
+        return this.tipoEspecial;
+    }
     public int getPos(){
         return this.pos;
     }
@@ -106,7 +127,18 @@ public class Casilla{
     public float getValor(){
         return this.valor;
     }
+    public Jugador getPropietario(){
+        return this.propietario;
+    }
+    
 
+    public void setPropietario(Jugador j){
+        this.propietario = j;
+    }
+    public void setImpuestos(float v){
+        this.impuesto = v;
+    }
+    
     public boolean esSalida(){
         return this.tipoEspecial != null && this.tipoEspecial == TipoCasillaEspecial.SALIDA;
     }
@@ -116,12 +148,51 @@ public class Casilla{
     public void eliminarAvatar(Avatar av){
         this.avatares.remove(av);
     }
-    public void setPropietario(Jugador j){
-        this.propietario = j;
+    private String caerSolar(Jugador j){
+        if(this.propietario.getNombre().equals("Banca")){
+            return "";
+        }
+        if(!j.puedePagar(this.alquiler)){
+            //TODO BANCARROTA
+        }
+        
+        this.propietario.anhadirFortuna(this.alquiler);
+        j.removeFortuna(this.alquiler);
+        return "Se han pagado %f€ de alquiler.".formatted(this.alquiler);
+
+    }
+    private String caerImpuestos(Jugador j){
+        if(!j.puedePagar(this.impuesto)){
+            //TODO BANCARROTA
+        }
+        j.removeFortuna(this.impuesto);
+        this.propietario.anhadirBote(this.impuesto);
+        return "El jugador paga %f€.".formatted(this.impuesto);
     }
 
+    private String caerParking(Jugador j){
+        float bote = this.propietario.getBote();
+        j.addFortuna(bote);
+        return "El jugador %s recibe %f€, el bote de la banca.".formatted(j.getNombre(),bote);
+    }
 
-
+    public String caer(Jugador j){
+        switch(this.tipo){
+            case SOLAR:
+                return caerSolar(j);
+            case IMPUESTOS:
+                return caerImpuestos(j);
+            case SUERTE:
+            case COMUNIDAD:
+                return "";
+            case ESPECIAL:
+                switch(this.tipoEspecial){
+                    case PARKING:
+                        return caerParking(j);
+                }
+        }
+        return "";
+    }
     @Override
     public String toString() {
 
@@ -174,22 +245,5 @@ public class Casilla{
             default:
                 return Color.Blanco;
         }
-    }
-    public TipoCasilla aTipoCasilla(String v){
-        for(TipoCasilla t: TipoCasilla.values()){
-            if(Objects.equals(v,t.getValue())){
-                return t;
-            }
-        }
-        return TipoCasilla.SOLAR; // TODO Valor de facto
-    }
-    private TipoCasillaEspecial aTipoCasillaEspecial(String s){
-        for(TipoCasillaEspecial t: TipoCasillaEspecial.values()){
-            if(Objects.equals(s,t.getValue())){
-                return t;
-            }
-        }
-        return TipoCasillaEspecial.CARCEL; // TODO Valor de facto
-
     }
 }
