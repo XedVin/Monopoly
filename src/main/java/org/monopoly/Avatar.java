@@ -1,8 +1,7 @@
 package org.monopoly;
 
-import java.util.Random;
-
 public class Avatar{
+    // Se definen los avatares que existen para el juego
     public enum TipoAvatar{
         Sombrero("sombrero"),
         Coche("coche"),
@@ -26,51 +25,44 @@ public class Avatar{
             return null;
         }
     }
-
     private char id;
     private TipoAvatar tipo;
     private Casilla casilla;
-    private Jugador jugador;
 
-    public Avatar(TipoAvatar avatar,Jugador jugador,Casilla salida){
-        this.tipo = avatar;
-        this.id = generarId();
+    //Constructor del avatar
+    public Avatar(char id,TipoAvatar tAvatar,Casilla salida){
+        this.tipo = tAvatar;
+        this.id = id;
         this.casilla = salida;
-        salida.añadirAvatar(this);
-        this.jugador = jugador;
+        salida.addAvatar(this);
     }
 
+    // GETTERS
     public char getId(){
         return this.id;
-    }
-    public TipoAvatar getTipoAvatar(){
-        return this.tipo;
     }
     public Casilla getCasilla(){
         return this.casilla;
     }
-
+    // SETTER
     public void setCasilla(Casilla c){
         this.casilla.eliminarAvatar(this);
         this.casilla = c;
-        this.casilla.añadirAvatar(this);
+        this.casilla.addAvatar(this);
     }
 
     @Override
+    // Sirve para pasar el objeto a string
     public String toString() {
+       return "%c".formatted(this.id);
+    }
+    public String toString(Jugador j){
         return """
-               {
-                id: %c,
-                tipo: %s,
-                casilla: %s,
-                jugador: %s
-               }""".formatted(this.getId(),this.tipo,this.casilla.getNombre(),this.jugador.getNombre());
+        {
+            id: %c,
+            tipo: %s,
+            casilla: %s,
+            jugador: %s
+        }""".formatted(this.id,this.tipo.getNombre(),this.casilla.getNombre(),j.getNombre());
     }
-
-    private char generarId(){
-        Random r = new Random();
-        int randomInt = (r.nextInt(90-65)+65);
-        return (char)randomInt;
-    }
-
 }

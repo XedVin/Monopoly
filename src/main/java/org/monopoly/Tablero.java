@@ -1,31 +1,31 @@
 package org.monopoly;
 
 import java.util.ArrayList;
+
+// Se definen las características del tablero
 public class Tablero{
     private ArrayList<Casilla> casillas;
     
-    public int ANCHO_TABLERO = 11;
-    public int ALTURA_TABLERO = 11;
+    public static final int ANCHO_TABLERO = 11;
+    public static final int ALTURA_TABLERO = 11;
     
     Tablero(ArrayList<Casilla> casillas){
         this.casillas = casillas;
     }
-
-
     @Override
     public String toString() {
         
         //String que contiene el tablero
-        String result = new String();
+        String result = "";
 
         // Primero busca la longitud de la palabra mas larga
         int maxWordLen = this.casillas.get(0).getNombre().length();
-        int numMaximoAvatares =0;
+        int numMaximoAvatares = 0;
         for (Casilla c: this.casillas){
-            if(numMaximoAvatares < c.getAvatares().size()){
-                numMaximoAvatares = c.getAvatares().size();
+            if (numMaximoAvatares < c.getCantidadAvataresEnCasilla()){
+                numMaximoAvatares = c.getCantidadAvataresEnCasilla();
             }
-            if(c.getNombre().length() > maxWordLen){
+            if (c.getNombre().length() > maxWordLen){
                 maxWordLen = c.getNombre().length();
             }
         }

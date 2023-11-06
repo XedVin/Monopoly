@@ -1,6 +1,6 @@
 package org.monopoly;
 
-
+// Se definen los colores que va a haber en el tablero
 public class ColorString {
     public enum Color{
         Rojo("\u001B[38;5;1m"),
@@ -22,14 +22,20 @@ public class ColorString {
             return value;
         }
     }
+
     private static final String ANSI_RESET = "\u001B[0m";
     private static final String ANSI_UNDERLINE = "\u001B[4m";
 
     private String content;
     private Color color;
 
+    // Se utiliza para poder aplicar un color a una cadena de texto
     public ColorString(String content){
         this.content = content;
+    };
+    public ColorString(String content,Color c){
+        this.content = content;
+        this.color = c;
     };
     public ColorString setColor(Color c){
         this.color = c;
